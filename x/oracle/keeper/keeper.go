@@ -5,8 +5,7 @@ import (
 	storetypes "cosmossdk.io/core/store"
 	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/glnro/oracle/types"
-	oracletypes "github.com/glnro/oracle/x/oracle/types"
+	oracletypes "github.com/glnro/random-oracle/x/oracle/types"
 )
 
 type Keeper struct {
@@ -16,13 +15,13 @@ type Keeper struct {
 	// state management
 	Schema        collections.Schema
 	Rounds        collections.Sequence
-	RandomResults collections.Map[uint64, types.RandomResult]
+	RandomResults collections.Map[uint64, oracletypes.RandomResult]
 }
 
 func NewKeeper(cdc codec.BinaryCodec, storeService storetypes.KVStoreService, logger log.Logger) Keeper {
 	sb := collections.NewSchemaBuilder(storeService)
 	rnds := collections.NewSequence(sb, oracletypes.RoundKey, "rounds")
-	rndRes := collections.NewMap(sb, oracletypes.RandomResultsKey, "randomres", collections.Uint64Key, codec.CollValue[types.RandomResult](cdc))
+	rndRes := collections.NewMap(sb, oracletypes.RandomResultsKey, "randomres", collections.Uint64Key, codec.CollValue[oracletypes.RandomResult](cdc))
 
 	k := Keeper{
 		cdc:    cdc,

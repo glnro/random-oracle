@@ -1,0 +1,11 @@
+syntax = "proto3";
+package glnro.random_oracle.v1;
+
+option go_package = "github.com/glnro/random-oracle/types";
+
+import "cosmos_proto/cosmos.proto";
+import "glnro/random_oracle/v1/types.proto";
+
+// GenesisState defines the module's genesis state.
+message GenesisState {
+}

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/glnro/oracle/app"
+	"github.com/glnro/random-oracle/app"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
-	"github.com/glnro/oracle/cmd/appd/cmd"
+	"github.com/glnro/random-oracle/cmd/appd/cmd"
 )
 
 func main() {

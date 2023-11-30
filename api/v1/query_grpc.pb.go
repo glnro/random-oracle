@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: glnro/oracle/v1/query.proto
+// source: glnro/random_oracle/v1/query.proto
 
-package oraclev1
+package random_oraclev1
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Query_RandomRound_FullMethodName = "/glnro.oracle.v1.Query/RandomRound"
+	Query_RandomRound_FullMethodName = "/glnro.random_oracle.v1.Query/RandomRound"
 )
 
 // QueryClient is the client API for Query service.
@@ -96,7 +96,7 @@ func _Query_RandomRound_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Query_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "glnro.oracle.v1.Query",
+	ServiceName: "glnro.random_oracle.v1.Query",
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -105,5 +105,5 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "glnro/oracle/v1/query.proto",
+	Metadata: "glnro/random_oracle/v1/query.proto",
 }

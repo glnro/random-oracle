@@ -2,7 +2,7 @@ version: v1
 managed:
   enabled: true
   go_package_prefix:
-    default: github.com/glnro/oracle/api
+    default: github.com/glnro/random_oracle/api
     except:
       - buf.build/googleapis/googleapis
       - buf.build/cosmos/gogo-proto

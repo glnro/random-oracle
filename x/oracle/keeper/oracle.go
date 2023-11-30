@@ -3,8 +3,8 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"github.com/glnro/oracle/provider"
-	"github.com/glnro/oracle/types"
+	"github.com/glnro/random-oracle/provider"
+	"github.com/glnro/random-oracle/x/oracle/types"
 )
 
 func (k *Keeper) SaveRandomness(goCtx context.Context, result provider.LatestRandomRound) error {

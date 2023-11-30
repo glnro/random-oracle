@@ -1,11 +1,11 @@
 syntax = "proto3";
 
-package glnro.oracle.module.v1;
+package glnro.random_oracle.module.v1;
 
 import "cosmos/app/v1alpha1/module.proto";
 
 message Module {
   option (cosmos.app.v1alpha1.module) = {
-    go_import : "github.com/glnro/oracle/types"
+    go_import : "github.com/glnro/random-oracle/x/oracle/types"
   };
 }

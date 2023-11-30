@@ -3,8 +3,8 @@ package types
 import "cosmossdk.io/collections"
 
 const (
-	ModuleName = "oracle"
-	StoreKey   = "oracle"
+	ModuleName = "random_oracle"
+	StoreKey   = "random_oracle"
 )
 
 var (

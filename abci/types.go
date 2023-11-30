@@ -3,7 +3,7 @@ package abci
 import (
 	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/glnro/oracle/provider"
+	"github.com/glnro/random-oracle/provider"
 )
 
 type ProposalHandler struct {

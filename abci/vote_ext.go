@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/glnro/oracle/provider"
+	"github.com/glnro/random-oracle/provider"
 )
 
 func NewVoteExtensionHandler(l log.Logger, p *provider.RandProvider) *VoteExtHandler {

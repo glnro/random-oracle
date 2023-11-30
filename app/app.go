@@ -7,8 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
-	"github.com/glnro/oracle/provider"
-	oracletypes "github.com/glnro/oracle/x/oracle/types"
+	"github.com/glnro/random-oracle/provider"
+	oracletypes "github.com/glnro/random-oracle/x/oracle/types"
 	"github.com/spf13/cast"
 	"io"
 	"os"
@@ -95,8 +95,9 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ibcmock "github.com/cosmos/ibc-go/v8/testing/mock"
-	abci2 "github.com/glnro/oracle/abci"
-	oraclekeeper "github.com/glnro/oracle/x/oracle/keeper"
+	abci2 "github.com/glnro/random-oracle/abci"
+	oraclekeeper "github.com/glnro/random-oracle/x/oracle/keeper"
+	oracle "github.com/glnro/random-oracle/x/oracle/module"
 )
 
 var (
@@ -218,7 +219,7 @@ func NewApp(
 		icahosttypes.StoreKey,
 		ibcfeetypes.StoreKey,
 		consensusparamtypes.StoreKey,
-		// TODO: Oracle
+		oracletypes.StoreKey,
 	)
 
 	// register streaming services
@@ -419,7 +420,7 @@ func NewApp(
 		upgrade.NewAppModule(app.UpgradeKeeper, app.AccountKeeper.AddressCodec()),
 		params.NewAppModule(app.ParamsKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
-		// TODO: Oracle
+		oracle.NewAppModule(appCodec, app.OracleKeeper),
 		// IBC modules
 		ibc.NewAppModule(app.IBCKeeper),
 		transfer.NewAppModule(app.TransferKeeper),
@@ -487,6 +488,7 @@ func NewApp(
 		paramstypes.ModuleName,
 		upgradetypes.ModuleName,
 		consensusparamtypes.ModuleName,
+		oracletypes.ModuleName,
 	}
 
 	app.mm.SetOrderInitGenesis(genesisModuleOrder...)
@@ -580,7 +582,7 @@ func (app *App) PreBlocker(ctx sdk.Context, req *abci.RequestFinalizeBlock) (*sd
 
 	err := app.OracleKeeper.SaveRandomness(ctx, provider.LatestRandomRound{})
 	if err != nil {
-		app.Logger().Error(fmt.Sprintf("error persisting oracle update :: %s", err.Error()))
+		app.Logger().Error(fmt.Sprintf("error persisting random_oracle update :: %s", err.Error()))
 	}
 
 	return app.mm.PreBlock(ctx)
