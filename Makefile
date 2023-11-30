@@ -109,6 +109,30 @@ distclean: clean
 	rm -rf vendor/
 
 
+###################
+###  Protobuf  ####
+###################
+
+protoVer=0.13.2
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
+
+proto-all: proto-format proto-lint proto-gen
+
+proto-gen:
+	@echo "Generating protobuf files..."
+	@$(protoImage) sh ./scripts/protocgen.sh
+	@go mod tidy
+
+proto-format:
+	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
+
+proto-lint:
+	@$(protoImage) buf lint
+
+.PHONY: proto-all proto-gen proto-format proto-lintll proto-gen proto-gen-any proto-swagger-gen proto-format proto-lint proto-check-breaking proto-update-deps mocks
+
+
 ###############################################################################
 ###                                Linting                                  ###
 ###############################################################################

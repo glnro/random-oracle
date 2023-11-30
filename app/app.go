@@ -8,6 +8,7 @@ import (
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibcconnectiontypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	"github.com/glnro/oracle/provider"
+	oracletypes "github.com/glnro/oracle/x/oracle/types"
 	"github.com/spf13/cast"
 	"io"
 	"os"
@@ -95,6 +96,7 @@ import (
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ibcmock "github.com/cosmos/ibc-go/v8/testing/mock"
 	abci2 "github.com/glnro/oracle/abci"
+	oraclekeeper "github.com/glnro/oracle/x/oracle/keeper"
 )
 
 var (
@@ -139,6 +141,9 @@ type App struct {
 	UpgradeKeeper         *upgradekeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
+
+	// Custom Keepers
+	OracleKeeper oraclekeeper.Keeper
 
 	// IBC
 	CapabilityKeeper *capabilitykeeper.Keeper
@@ -213,6 +218,7 @@ func NewApp(
 		icahosttypes.StoreKey,
 		ibcfeetypes.StoreKey,
 		consensusparamtypes.StoreKey,
+		// TODO: Oracle
 	)
 
 	// register streaming services
@@ -244,14 +250,13 @@ func NewApp(
 		"8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
 	)
 
-	bApp.SetPrepareProposal(abci2.PrepareProposalHandler())
-	bApp.SetProcessProposal(abci2.ProcessProposalHandler())
-	// create and set dummy vote extension handler
-	voteExtOp := func(bApp *baseapp.BaseApp) {
-		voteExtHandler := abci2.NewVoteExtensionHandler(logger, randProvider)
-		voteExtHandler.SetHandlers(bApp)
-	}
-	baseAppOptions = append(baseAppOptions, voteExtOp, baseapp.SetOptimisticExecution())
+	proposalHandler := abci2.NewProposalHandler(logger, txConfig)
+	voteExtHandler := abci2.NewVoteExtensionHandler(logger, randProvider)
+
+	// Set ABCI++ Handlers
+	bApp.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
+	bApp.SetProcessProposal(proposalHandler.ProcessProposalHandler())
+	bApp.SetExtendVoteHandler(voteExtHandler.ExtendVoteHandler())
 
 	app.ParamsKeeper = initParamsKeeper(appCodec, legacyAmino, keys[paramstypes.StoreKey], tkeys[paramstypes.TStoreKey])
 
@@ -274,6 +279,13 @@ func NewApp(
 	app.CapabilityKeeper.Seal()
 
 	// SDK module keepers
+
+	// Oracle Config
+	app.OracleKeeper = oraclekeeper.NewKeeper(
+		appCodec,
+		runtime.NewKVStoreService(keys[oracletypes.StoreKey]),
+		logger,
+	)
 
 	// add keepers
 	app.AccountKeeper = authkeeper.NewAccountKeeper(
@@ -407,7 +419,7 @@ func NewApp(
 		upgrade.NewAppModule(app.UpgradeKeeper, app.AccountKeeper.AddressCodec()),
 		params.NewAppModule(app.ParamsKeeper),
 		consensus.NewAppModule(appCodec, app.ConsensusParamsKeeper),
-
+		// TODO: Oracle
 		// IBC modules
 		ibc.NewAppModule(app.IBCKeeper),
 		transfer.NewAppModule(app.TransferKeeper),
@@ -440,6 +452,11 @@ func NewApp(
 		icatypes.ModuleName,
 		ibcfeetypes.ModuleName,
 		ibcmock.ModuleName,
+	)
+
+	// NOTE: upgrade module is required to be prioritized
+	app.mm.SetOrderPreBlockers(
+		upgradetypes.ModuleName,
 	)
 
 	app.mm.SetOrderEndBlockers(
@@ -502,6 +519,7 @@ func NewApp(
 	// <Upgrade handler setup here>
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
+	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
@@ -554,6 +572,19 @@ func (app *App) setAnteHandler(txConfig client.TxConfig) {
 }
 
 func (app *App) Name() string { return app.BaseApp.Name() }
+
+// PreBlocker application updates every pre block
+func (app *App) PreBlocker(ctx sdk.Context, req *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
+	//veTx := req.Txs[0]
+	// process VE
+
+	err := app.OracleKeeper.SaveRandomness(ctx, provider.LatestRandomRound{})
+	if err != nil {
+		app.Logger().Error(fmt.Sprintf("error persisting oracle update :: %s", err.Error()))
+	}
+
+	return app.mm.PreBlock(ctx)
+}
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {

@@ -33,7 +33,7 @@ func (p *RandProvider) GetLatestRandomness() (*LatestRandomRound, error) {
 
 	return &LatestRandomRound{
 		Round:      randRes.Round(),
-		Randomness: randRes.Randomness(),
-		Signature:  randRes.Signature(),
+		Randomness: string(randRes.Randomness()),
+		Signature:  string(randRes.Signature()),
 	}, nil
 }

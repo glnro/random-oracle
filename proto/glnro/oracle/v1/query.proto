@@ -1,0 +1,24 @@
+syntax = "proto3";
+package glnro.oracle.v1;
+
+option go_package = "github.com/glnro/oracle/types";
+
+import "google/api/annotations.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos/query/v1/query.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "glnro/oracle/v1/types.proto";
+
+
+
+service Query {
+  rpc RandomRound(QueryRandomRoundRequest) returns (QueryRandomRoundResponse) {
+    option (google.api.http).get = "/cosmos/oracle/random_round/{round}";
+  }
+}
+
+message QueryRandomRoundRequest { uint64 round = 1; }
+
+message QueryRandomRoundResponse { RandomResult random_result = 1; }

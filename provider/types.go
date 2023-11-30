@@ -2,8 +2,8 @@ package provider
 
 type LatestRandomRound struct {
 	Round      uint64
-	Randomness []byte
-	Signature  []byte
+	Randomness string
+	Signature  string
 }
 
 type RandProvider struct {

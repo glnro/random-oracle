@@ -7,7 +7,12 @@
 make start-localnet
 ```
 
-#### Testimg
+#### Developing
+
+**Generate Protos**
+```shell
+make proto-gen
+```
 
 **Generate Mocks**
 
