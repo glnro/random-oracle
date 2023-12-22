@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package glnro.random_oracle.v1;
+
+option go_package = "github.com/glnro/random-oracle/types";
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "google/protobuf/any.proto";
+import "glnro/random_oracle/v1/types.proto";
+import "cosmos/msg/v1/msg.proto";
+import "amino/amino.proto";
+
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  rpc CreateSideTxA(MsgNewSideTx) returns (MsgNewSideTxResponse);
+}
+
+message MsgNewSideTx {
+  google.protobuf.Any side_transaction = 1 [(cosmos_proto.accepts_interface) = "glnro.random_oracle.v1.SideTransaction"];
+}
+
+message MsgNewSideTxResponse {}
