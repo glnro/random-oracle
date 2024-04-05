@@ -14,3 +14,15 @@ message RandomResult {
   string randomness = 2;
   string signature = 3;
 }
+
+message SideTransactionA {
+  option (cosmos_proto.implements_interface) = "glnro.random_oracle.v1.SideTransaction";
+  option (amino.name)                        = "cosmos-sdk/SideTransactionA";
+  string name = 1;
+}
+
+message SideTransactionB {
+  option (cosmos_proto.implements_interface) = "glnro.random_oracle.v1.SideTransaction";
+  option (amino.name)                        = "cosmos-sdk/SideTransactionB";
+  string title = 1;
+}

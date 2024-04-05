@@ -14,7 +14,7 @@ func NewRandomnessProvider(urls []string, chainHash string) *RandProvider {
 	}
 }
 
-func (p *RandProvider) GetLatestRandomness() (*LatestRandomRound, error) {
+func (p *RandProvider) GetLatestRandomness(ctx context.Context) (*LatestRandomRound, error) {
 	var chainHash, _ = hex.DecodeString(p.chainHash)
 
 	c, err := client.New(
@@ -26,7 +26,7 @@ func (p *RandProvider) GetLatestRandomness() (*LatestRandomRound, error) {
 		return nil, err
 	}
 
-	randRes, err := c.Get(context.Background(), 0)
+	randRes, err := c.Get(ctx, 0)
 	if err != nil {
 		return nil, err
 	}

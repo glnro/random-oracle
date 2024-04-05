@@ -22,7 +22,7 @@ buf generate --template buf.gen.pulsar.yaml
 cd ..
 echo "finished"
 
-cp -r github.com/glnro/random-oracle/* ./x/random_oracle/
+cp -r github.com/glnro/random-oracle/* ./x/oracle/
 rm -rf api && mkdir api
 mv glnro/random_oracle/* ./api
 rm -rf github.com glnro

@@ -114,6 +114,7 @@ var (
 		icatypes.ModuleName:            nil,
 		ibcmock.ModuleName:             nil,
 	}
+	FlagByzantine = "run-byzantine"
 )
 
 var (
@@ -230,6 +231,8 @@ func NewApp(
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, ibcmock.MemStoreKey)
 
+	//isByzantine := cast.ToBool(appOpts.Get(FlagByzantine))
+
 	app := &App{
 		BaseApp:           bApp,
 		legacyAmino:       legacyAmino,
@@ -251,13 +254,18 @@ func NewApp(
 		"8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
 	)
 
-	proposalHandler := abci2.NewProposalHandler(logger, txConfig)
-	voteExtHandler := abci2.NewVoteExtensionHandler(logger, randProvider)
+	// Initialize ABCI handlers
+	veHandler := abci2.NewExtendVoteHandler(logger, &app.OracleKeeper)
+	vveHandler := abci2.NewVerifyVoteExtHandler(logger, &app.OracleKeeper)
+	preparePropHandler := abci2.NewPrepareProposalHandler(logger, app.appCodec, &app.OracleKeeper)
+	processPropHandler := abci2.NewProcessProposalHandler(logger, &app.OracleKeeper)
+	pbHandler := abci2.NewPreBlockHandler(logger, &app.OracleKeeper, app.mm)
 
 	// Set ABCI++ Handlers
-	bApp.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
-	bApp.SetProcessProposal(proposalHandler.ProcessProposalHandler())
-	bApp.SetExtendVoteHandler(voteExtHandler.ExtendVoteHandler())
+	bApp.SetPrepareProposal(preparePropHandler.PrepareProposalHandler())
+	bApp.SetProcessProposal(processPropHandler.ProcessProposalHandler())
+	bApp.SetExtendVoteHandler(veHandler.ExtendVoteHandler())
+	bApp.SetVerifyVoteExtensionHandler(vveHandler.VerifyVoteExtensionHandler())
 
 	app.ParamsKeeper = initParamsKeeper(appCodec, legacyAmino, keys[paramstypes.StoreKey], tkeys[paramstypes.TStoreKey])
 
@@ -282,9 +290,12 @@ func NewApp(
 	// SDK module keepers
 
 	// Oracle Config
+
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[oracletypes.StoreKey]),
+		randProvider,
+		app.StakingKeeper,
 		logger,
 	)
 
@@ -521,7 +532,7 @@ func NewApp(
 	// <Upgrade handler setup here>
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(app.PreBlocker)
+	app.SetPreBlocker(pbHandler.PreBlocker())
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
@@ -574,19 +585,6 @@ func (app *App) setAnteHandler(txConfig client.TxConfig) {
 }
 
 func (app *App) Name() string { return app.BaseApp.Name() }
-
-// PreBlocker application updates every pre block
-func (app *App) PreBlocker(ctx sdk.Context, req *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
-	//veTx := req.Txs[0]
-	// process VE
-
-	err := app.OracleKeeper.SaveRandomness(ctx, provider.LatestRandomRound{})
-	if err != nil {
-		app.Logger().Error(fmt.Sprintf("error persisting random_oracle update :: %s", err.Error()))
-	}
-
-	return app.mm.PreBlock(ctx)
-}
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {

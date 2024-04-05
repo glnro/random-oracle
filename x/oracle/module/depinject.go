@@ -7,7 +7,9 @@ import (
 	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	modulev1 "github.com/glnro/random-oracle/api/module/v1"
+	"github.com/glnro/random-oracle/provider"
 	"github.com/glnro/random-oracle/x/oracle/keeper"
+	oracletypes "github.com/glnro/random-oracle/x/oracle/types"
 )
 
 var _ appmodule.AppModule = AppModule{}
@@ -32,6 +34,9 @@ type ModuleInputs struct {
 	StoreService store.KVStoreService
 	Logger       log.Logger
 
+	RandProvider provider.RandProvider
+	sk           oracletypes.StakingKeeper
+
 	Config *modulev1.Module
 }
 
@@ -44,7 +49,7 @@ type ModuleOutputs struct {
 
 func ProvideModule(in ModuleInputs) ModuleOutputs {
 
-	k := keeper.NewKeeper(in.Cdc, in.StoreService, in.Logger)
+	k := keeper.NewKeeper(in.Cdc, in.StoreService, &in.RandProvider, in.sk, in.Logger)
 	m := NewAppModule(in.Cdc, k)
 
 	return ModuleOutputs{Module: m, Keeper: k}

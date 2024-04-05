@@ -1,5 +1,7 @@
 package provider
 
+import "context"
+
 type RandomnessProvider interface {
-	GetLatestRandomness() (*LatestRandomRound, error)
+	GetLatestRandomness(ctx context.Context) (*LatestRandomRound, error)
 }
