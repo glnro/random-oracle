@@ -31,6 +31,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	FlagByzantine = "run-byzantine"
+)
+
 func initTendermintConfig() *tmcfg.Config {
 	cfg := tmcfg.DefaultConfig()
 
@@ -79,6 +83,7 @@ func initRootCmd(rootCmd *cobra.Command, encodingConfig app.EncodingConfig, basi
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {
+	startCmd.Flags().String(FlagByzantine, "false", "enable byzantine behavior")
 	crisis.AddModuleInitFlags(startCmd)
 }
 

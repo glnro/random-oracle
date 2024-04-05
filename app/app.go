@@ -114,6 +114,7 @@ var (
 		icatypes.ModuleName:            nil,
 		ibcmock.ModuleName:             nil,
 	}
+	FlagByzantine = "run-byzantine"
 )
 
 var (
@@ -229,6 +230,8 @@ func NewApp(
 
 	tkeys := storetypes.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := storetypes.NewMemoryStoreKeys(capabilitytypes.MemStoreKey, ibcmock.MemStoreKey)
+
+	//isByzantine := cast.ToBool(appOpts.Get(FlagByzantine))
 
 	app := &App{
 		BaseApp:           bApp,
@@ -574,19 +577,6 @@ func (app *App) setAnteHandler(txConfig client.TxConfig) {
 }
 
 func (app *App) Name() string { return app.BaseApp.Name() }
-
-// PreBlocker application updates every pre block
-func (app *App) PreBlocker(ctx sdk.Context, req *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
-	//veTx := req.Txs[0]
-	// process VE
-
-	err := app.OracleKeeper.SaveRandomness(ctx, provider.LatestRandomRound{})
-	if err != nil {
-		app.Logger().Error(fmt.Sprintf("error persisting random_oracle update :: %s", err.Error()))
-	}
-
-	return app.mm.PreBlock(ctx)
-}
 
 // BeginBlocker application updates every begin block
 func (app *App) BeginBlocker(ctx sdk.Context) (sdk.BeginBlock, error) {
