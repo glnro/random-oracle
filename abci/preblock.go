@@ -7,7 +7,7 @@ import (
 
 func (h *PreBlockHandler) PreBlocker() sdk.PreBlocker {
 	return func(ctx sdk.Context, req *abci.RequestFinalizeBlock) (*sdk.ResponsePreBlock, error) {
-		err := h.oraclePreBlock(ctx, req, h.logger)
+		err := h.oraclePreBlock(ctx, req, h.ok, h.logger)
 		if err != nil {
 			return &sdk.ResponsePreBlock{}, err
 		}

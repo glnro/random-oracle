@@ -3,8 +3,8 @@ package abci
 import (
 	"encoding/json"
 	abci "github.com/cometbft/cometbft/abci/types"
-	abci2 "github.com/glnro/random-oracle/abci"
 	"github.com/glnro/random-oracle/provider"
+	oracletypes "github.com/glnro/random-oracle/x/oracle/types"
 )
 
 func UnmarshalInjectedVE(ve []byte) (*abci.ExtendedCommitInfo, error) {
@@ -16,8 +16,8 @@ func UnmarshalInjectedVE(ve []byte) (*abci.ExtendedCommitInfo, error) {
 	return &extCommInfo, nil
 }
 
-func UnmarshalVE(ve []byte) (*abci2.VoteExtension, error) {
-	var voteExt abci2.VoteExtension
+func UnmarshalVE(ve []byte) (*oracletypes.VoteExtension, error) {
+	var voteExt oracletypes.VoteExtension
 	err := json.Unmarshal(ve, &voteExt)
 	if err != nil {
 		return nil, err

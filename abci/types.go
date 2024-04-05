@@ -6,16 +6,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/glnro/random-oracle/provider"
 	oabci "github.com/glnro/random-oracle/x/oracle/abci"
 	oracletypes "github.com/glnro/random-oracle/x/oracle/types"
 )
 
 type (
-	VoteExtension struct {
-		LatestRand provider.LatestRandomRound
-	}
-
 	PrepareProposalHandler struct {
 		logger                log.Logger
 		ok                    oracletypes.OracleKeeper

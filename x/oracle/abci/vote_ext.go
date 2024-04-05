@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci2 "github.com/glnro/random-oracle/abci"
 	oracletypes "github.com/glnro/random-oracle/x/oracle/types"
 )
 
@@ -18,7 +17,7 @@ func ExtendVote(ctx sdk.Context, req *abci.RequestExtendVote, ok oracletypes.Ora
 		return &abci.ResponseExtendVote{VoteExtension: nil}, err
 	}
 
-	ve := abci2.VoteExtension{lr}
+	ve := oracletypes.VoteExtension{LatestRand: lr}
 	log.Info("vote extension submitted", "value", ve.LatestRand, "height", req.Height)
 	bz, err := json.Marshal(ve)
 	if err != nil {
