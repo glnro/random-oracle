@@ -37,7 +37,7 @@ func (h *PrepareProposalHandler) PrepareProposalHandler() sdk.PrepareProposalHan
 	}
 }
 
-func (h *PrepareProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
+func (h *ProcessProposalHandler) ProcessProposalHandler() sdk.ProcessProposalHandler {
 	return func(_ sdk.Context, _ *abci.RequestProcessProposal) (*abci.ResponseProcessProposal, error) {
 		// TODO: Validate signatures on VE
 		return &abci.ResponseProcessProposal{Status: abci.ResponseProcessProposal_ACCEPT}, nil

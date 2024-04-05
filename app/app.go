@@ -254,13 +254,18 @@ func NewApp(
 		"8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
 	)
 
-	proposalHandler := abci2.NewProposalHandler(logger, txConfig)
-	voteExtHandler := abci2.NewVoteExtensionHandler(logger, randProvider)
+	// Initialize ABCI handlers
+	veHandler := abci2.NewExtendVoteHandler(logger, &app.OracleKeeper)
+	vveHandler := abci2.NewVerifyVoteExtHandler(logger, &app.OracleKeeper)
+	preparePropHandler := abci2.NewPrepareProposalHandler(logger, app.appCodec, &app.OracleKeeper)
+	processPropHandler := abci2.NewProcessProposalHandler(logger, &app.OracleKeeper)
+	pbHandler := abci2.NewPreBlockHandler(logger, &app.OracleKeeper, app.mm)
 
 	// Set ABCI++ Handlers
-	bApp.SetPrepareProposal(proposalHandler.PrepareProposalHandler())
-	bApp.SetProcessProposal(proposalHandler.ProcessProposalHandler())
-	bApp.SetExtendVoteHandler(voteExtHandler.ExtendVoteHandler())
+	bApp.SetPrepareProposal(preparePropHandler.PrepareProposalHandler())
+	bApp.SetProcessProposal(processPropHandler.ProcessProposalHandler())
+	bApp.SetExtendVoteHandler(veHandler.ExtendVoteHandler())
+	bApp.SetVerifyVoteExtensionHandler(vveHandler.VerifyVoteExtensionHandler())
 
 	app.ParamsKeeper = initParamsKeeper(appCodec, legacyAmino, keys[paramstypes.StoreKey], tkeys[paramstypes.TStoreKey])
 
@@ -285,9 +290,12 @@ func NewApp(
 	// SDK module keepers
 
 	// Oracle Config
+
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[oracletypes.StoreKey]),
+		randProvider,
+		app.StakingKeeper,
 		logger,
 	)
 
@@ -524,7 +532,7 @@ func NewApp(
 	// <Upgrade handler setup here>
 	// initialize BaseApp
 	app.SetInitChainer(app.InitChainer)
-	app.SetPreBlocker(app.PreBlocker)
+	app.SetPreBlocker(pbHandler.PreBlocker())
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
 	app.setAnteHandler(txConfig)
